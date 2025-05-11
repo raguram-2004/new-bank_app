@@ -15,7 +15,7 @@ def get_id():
             
     except FileNotFoundError:
         return 1001
-#print(get_id())
+
 #=============================================================================================================
 
 
@@ -197,7 +197,6 @@ def unique_username():
                             username_exists = True
                             break
             except FileNotFoundError:
-                # If file doesn't exist, assume no users yet
                 pass
 
             if username_exists:
@@ -280,7 +279,6 @@ def action_deposit():
             print('Invalid input! Please enter a valid number for the deposit.')
 
     try:
-        # Read balance file and update the balance
         with open('balance.txt', 'r') as ffile:
             lines = ffile.readlines()
         
@@ -298,13 +296,11 @@ def action_deposit():
                     updated = True
                     print('Deposit successful!')
                     break
-        
-        # If the user was found, write the updated data back to balance.txt
+    
         if updated:
             with open('balance.txt', 'w') as ffile:
                 ffile.writelines(lines)
             
-            # Write the transaction to the transaction file
             from datetime import datetime
             with open('transactions.txt', 'a') as file:
                 date_time = datetime.now().strftime('%d-%m-%Y %A %I.%M %p')
@@ -328,9 +324,9 @@ def action_withdraw():
                 print('Withdrawal amount must be greater than 0.')
                 continue
             else:
-                Amount = amount  # Save as float globally
+                Amount = amount 
                 check_amount()
-                break  # Exit after one transaction
+                break  
         except ValueError:
             print('Please enter a valid number.')
         except Exception as e:
@@ -371,7 +367,6 @@ def check_amount():
             with open('balance.txt', 'w') as ffile:
                 ffile.writelines(lines)
 
-            # Log the transaction
             from datetime import datetime
             with open('transactions.txt', 'a') as file:
                 date_time = datetime.now().strftime('%d-%m-%Y %A %I:%M %p')
