@@ -1,3 +1,6 @@
+
+import hashlib
+
 Login_User_id = ''
 Amount = 0.0  
 def get_id():
@@ -75,15 +78,16 @@ def security():
                                                     password = datas[4]
                                                     
                                                     if Login_User_id == userid:
-                                                        password = new_password
+                                                        datas[4] = new_password 
+                                                        hashed_password = hashlib.sha256(new_password.encode()).hexdigest()
                                                         updated = True
-                                                        rule[i] = f'{name},{accountnumber},{userid},{username},{password},\n'
+                                                        rule[i] = f'{name},{accountnumber},{userid},{username},{hashed_password},\n'
                                                         print('Your password has been changed.')
                                                         break
                                             if updated:
                                                 with open('Customer.txt', 'w') as customer_file:
                                                     customer_file.writelines(rule)
-                                                    return password
+                                                    return hashed_password
                                     else:
                                         print('Password do not match! Please try again.')         
                                         #break
@@ -125,7 +129,8 @@ def check_username():
                     if len(details) >= 5:
                         userid = details[2]
                         username = details[3]
-                        password = details[4]
+                        stored_hashpassword = details[4]
+                        
                         #while True:
                         if user_name == username:
                             user_found = True
@@ -133,43 +138,52 @@ def check_username():
                             for attempt in range(3):
                                 print(' 1. Forgot Password')
                                 user_password = input('Enter your password or Enter 1 to change password: ')
+                                #hash_user_password =hashlib.sha256(user_password.encode()).hexdigest()
                                 #c = input('Enter 1 to change password:')
                                 if user_password == '1':
                                     #security()
-                                    changed_password = security()
-                                    if changed_password:
+                                    hashed_changed_password = security()
+                                    #hashed_changed_password = hashlib.sha256(changed_password.encode()).hexdigest()
+                                    if hashed_changed_password:
                                         p_word = input('Enter your changed password:')
-                                        if changed_password == p_word:
+                                        hashed_p_word = hashlib.sha256(p_word.encode()).hexdigest()
+                                        if hashed_changed_password == hashed_p_word:
                                             print('Access successful.')
                                             return
                                         else:
                                             print('Illegal activity!')
                                             exit()
-                                    #break
-                                elif user_password == password:
-                                    print('Access Successful!')
-                                    return
+                                    else:
+                                        continue
                                 else:
-                                    print(f'Incorrect password. Attempts left: {2 - attempt}')
+                                    hash_user_password = hashlib.sha256(user_password.encode()).hexdigest()
+                                    if hash_user_password == stored_hashpassword: 
+                                        print('Access Successful!')
+                                        return
+                                    else:
+                                        print(f'Incorrect password. Attempts left: {2 - attempt}')
                             print('Access Denied! Too many failed attempts.')
                             exit()
                             return  
             if not user_found:
-                print('\nCustomer not found.')
-                print('1. Try again')
-                print('2. Create customer')
-                print('3. Exit')
-                choice = input('Enter your choice: ')
-                if choice == '1':
-                    continue
-                elif choice == '2':
-                    create_customer()
-                elif choice == '3':
-                    print('Exiting...')
-                    return
-                else:
-                    print('Invalid input. Please enter 1, 2, or 3.')
-                    continue
+                while True:
+                    print('\nCustomer not found.')
+                    print('1. Try again')
+                    print('2. Create customer')
+                    print('3. Exit')
+                    choice = input('Enter your choice: ')
+                    if choice == '1':
+                        check_username()
+                        break
+                    elif choice == '2':
+                        create_customer()
+                    elif choice == '3':
+                        print('Exiting...')
+                        login()
+                        break
+                    else:
+                        print('Invalid input. Please enter 1, 2, or 3.')
+                        continue
         except FileNotFoundError:
             print("Customer file not found.")
             exit()
@@ -224,6 +238,8 @@ def create_customer():
     accountnumber = get_accountnumber()
     use_name =unique_username()
     password = input('Enter user password: ')
+    hashed_password = hashlib.sha256(password.encode()).hexdigest()
+    
     
     while True:
         try:
@@ -248,7 +264,7 @@ def create_customer():
             print("Invalid account type. Please enter 'savings_account' or 'current_account'.")
  
     with open('Customer.txt', 'a') as file:
-        file.write(f'{name},{accountnumber},{user_id},{use_name},{password},\n')
+        file.write(f'{name},{accountnumber},{user_id},{use_name},{hashed_password},\n')
     with open('balance.txt','a')as file:
         file.write(f'{user_id},{balance},{statement}\n')
     with open('nic.txt','a')as file:
@@ -528,6 +544,9 @@ def login():
             print('Exiting...')
             exit()
             break
+        else:
+            print('Invalid input! Please enter 1, 2, or 3.')
+            continue
         
 login()
                     
